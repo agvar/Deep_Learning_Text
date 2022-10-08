@@ -71,8 +71,6 @@ def save_df_as_files(s3_bucket,file_loc,df):
         except ClientError as e:
                 print(f"Unable to save dataframe {df} to file")
 
-
-
 def create_latest_dffiles(ts_latest_s3,counter=-1):   
     '''
     reads incremental file into a dataframe. The last_modified time of the file is compared to the saved timestamp,
@@ -103,7 +101,7 @@ def create_latest_dffiles(ts_latest_s3,counter=-1):
     
     if not df_filelist.empty:
         latest_ts_updated=ts_list[-1] 
-        
+        check_new_files_flag=1
         #with placeholder.container():
         #create dataframe and values
         df_filelist['created_day']= pd.to_datetime(df_filelist.created_at).dt.date
@@ -159,10 +157,10 @@ def create_latest_dffiles(ts_latest_s3,counter=-1):
                 st.markdown("### Tweets by source ")
                 st.table(df_source)
         '''
-        return df_sentiment_day,df_sentiment_month,df_source,total_tweets_count,postive_tweets_count,negetive_tweets_count,total_days,latest_ts_updated
     else:
         print(f"No file in s3 location : {s3_bucket}/{s3_folder} after latest timestamp of {ts_latest_s3}")
-        return None,None
+        check_new_files_flag=0
+    return check_new_files_flag
 
 #main
 '''
@@ -180,6 +178,7 @@ default_ts='1973-01-01 00:00:00'
 columns=['tweet_id', 'created_at', 'text', 'extended_tweet_text', 'source','user', 'followers_count', 'friends_count', 'geo_enabled', 'time_zone','geo', 'coordinates','model_api_sentiment','source_cleaned']
 
 # initilalze the previous  run dataframes
+check_new_files_flag=1
 prev_df_sentiment_day=pd.DataFrame(columns=['model_api_sentiment','created_day','count'])
 prev_df_sentiment_month=pd.DataFrame(columns=['model_api_sentiment','created_month','count'])
 prev_df_source=pd.DataFrame(columns=['model_api_sentiment','source_cleaned','count'])
@@ -200,22 +199,18 @@ try:
         s3_file_source_df=s3_resource.Object(s3_bucket,file_loc_source_df)
 
 except Exception as e:
-        print(f"error reading from {config_path}:{e}")
+        print(f"error reading from {config_path}:{e},,{traceback.format_exc()}")
         sys.exit(1)
 
 #check the previous timestamps and dataframes 
 ts_latest_s3=get_latest_ts_s3(s3_bucket,file_loc_ts_s3)
-file_day_df,file_month_df,file_source_df=get_dfs_s3(s3_bucket,s3_file_day_df,s3_file_month_df,s3_file_source_df)
+get_dfs_s3(s3_bucket,s3_file_day_df,s3_file_month_df,s3_file_source_df)
 
-try:
-        for seconds in range(1):
-            create_latest_dffiles(ts_latest_s3)
-            #print('sleeping')
-            #time.sleep(30)
-            #print('waking up')
-except Exception as e:
-        print(f"error :{e},{traceback.format_exc()}")
-        sys.exit(1)
+while check_new_files_flag:
+        check_new_files_flag=create_latest_dffiles(ts_latest_s3)
+        #print('sleeping')
+        #time.sleep(30)
+        #print('waking up')
 
 save_df_as_files(s3_bucket,file_loc_day_df,prev_df_sentiment_day)
 save_df_as_files(s3_bucket,file_loc_month_df,prev_df_sentiment_month)
