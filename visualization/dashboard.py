@@ -38,13 +38,14 @@ def get_dfs_s3(s3_bucket,s3_file_day_df,s3_file_month_df,s3_file_source_df) :
     global prev_df_sentiment_month
     global prev_df_sentiment_source
     try:
-        prev_df_sentiment_day=s3_file_day_df.get()['Body'].read().decode('utf-8')
+        prev_df_sentiment_day=pd.read_csv(s3_file_day_df.get()['Body'].read().decode('utf-8'))
         prev_df_sentiment_month=s3_file_month_df.get()['Body'].read().decode('utf-8')
         prev_df_sentiment_source=s3_file_source_df.get()['Body'].read().decode('utf-8')
     except ClientError: 
         print(f"older version of dataframes files not found, using defaults")
         print(f"error :{traceback.format_exc()}")
         #sys.exit(1)
+    print("insde funct",{prev_df_sentiment_day})
 
 
 def save_latest_ts_s3(s3_file_ts,latest_ts_updated):
@@ -183,6 +184,7 @@ prev_df_sentiment_day=pd.DataFrame(columns=['model_api_sentiment','created_day',
 prev_df_sentiment_month=pd.DataFrame(columns=['model_api_sentiment','created_month','count'])
 prev_df_source=pd.DataFrame(columns=['model_api_sentiment','source_cleaned','count'])
 
+print(prev_df_sentiment_day)
 try:
         config=configparser.ConfigParser()       
         config.read(config_path)
