@@ -1,4 +1,4 @@
-#import streamlit as st
+import streamlit as st
 import pandas as pd
 import numpy as np
 import configparser
@@ -98,6 +98,7 @@ def create_latest_dffiles(counter=-1):
     global last_procesed_ts
     global prev_sentiment_counts
     global prev_day_list
+    global initial_run_flag
 
     print(f'check last_procesed_ts{last_procesed_ts}')
     for file in s3_resource.Bucket(s3_bucket).objects.filter(Prefix=s3_folder):
@@ -114,62 +115,63 @@ def create_latest_dffiles(counter=-1):
             except Exception as e:
                 print(f"Error reading file: {e}")
     
-    if not df_filelist.empty:
-        last_procesed_ts=ts_list[-1] 
+    if not(df_filelist.empty) or (initial_run_flag):
+        if not(df_filelist.empty):  
+            last_procesed_ts=ts_list[-1] 
         print(f'assign last_procesed_ts{last_procesed_ts}')
         check_new_files_flag=1
-        #with placeholder.container():
+        with placeholder.container():
         #create dataframe and values
-        df_filelist['created_day']= pd.to_datetime(df_filelist.created_at).dt.date
-        df_filelist['created_month']= pd.to_datetime(df_filelist.created_at).dt.month
+            df_filelist['created_day']= pd.to_datetime(df_filelist.created_at).dt.date
+            df_filelist['created_month']= pd.to_datetime(df_filelist.created_at).dt.month
 
 
-        df_sentiment_day=df_filelist.groupby(['model_api_sentiment','created_day'])['tweet_id'].agg(['count']).reset_index() 
-        df_sentiment_month=df_filelist.groupby(['model_api_sentiment','created_month'])['tweet_id'].agg(['count']).reset_index() 
-        df_source=df_filelist.groupby(['source_cleaned'])['tweet_id'].agg(['count']).reset_index() 
-   
+            df_sentiment_day=df_filelist.groupby(['model_api_sentiment','created_day'])['tweet_id'].agg(['count']).reset_index() 
+            df_sentiment_month=df_filelist.groupby(['model_api_sentiment','created_month'])['tweet_id'].agg(['count']).reset_index() 
+            df_source=df_filelist.groupby(['source_cleaned'])['tweet_id'].agg(['count']).reset_index() 
+    
 
-        #concat latest dataframe to previous dataframes 
-        df_sentiment_day=pd.concat([df_sentiment_day,prev_df_sentiment_day])
-        df_sentiment_day=df_sentiment_day.groupby(['model_api_sentiment','created_day'])['count'].agg(['sum']).reset_index() 
-        df_sentiment_month=pd.concat([df_sentiment_month,prev_df_sentiment_month])
-        df_sentiment_month=df_sentiment_month.groupby(['model_api_sentiment','created_month'])['count'].agg(['sum']).reset_index() 
-        df_source=pd.concat([df_source,prev_df_source])
-        df_source=df_source.groupby(['source_cleaned'])['count'].agg(['sum']).reset_index() 
-        #assign prev datframes
-        prev_df_sentiment_day=df_sentiment_day
-        prev_df_sentiment_month=df_sentiment_month
-        prev_df_source=df_source
+            #concat latest dataframe to previous dataframes 
+            df_sentiment_day=pd.concat([df_sentiment_day,prev_df_sentiment_day])
+            df_sentiment_day=df_sentiment_day.groupby(['model_api_sentiment','created_day'])['count'].agg(['sum']).reset_index() 
+            df_sentiment_month=pd.concat([df_sentiment_month,prev_df_sentiment_month])
+            df_sentiment_month=df_sentiment_month.groupby(['model_api_sentiment','created_month'])['count'].agg(['sum']).reset_index() 
+            df_source=pd.concat([df_source,prev_df_source])
+            df_source=df_source.groupby(['source_cleaned'])['count'].agg(['sum']).reset_index() 
+            #assign prev datframes
+            prev_df_sentiment_day=df_sentiment_day
+            prev_df_sentiment_month=df_sentiment_month
+            prev_df_source=df_source
 
-        #add current counts to previous counts
-        total_tweets_count=len(df_filelist)+prev_sentiment_counts[0]
-        postive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Positive'])+prev_sentiment_counts[1]
-        negetive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Negetive'])+prev_sentiment_counts[2]
-        total_days= df_filelist['created_day'].unique().tolist()
-        for day in prev_day_list:
-            total_days.append(day)
-        total_days=list(set(total_days))
-        total_days_count=len(set(total_days))
+            #add current counts to previous counts
+            total_tweets_count=len(df_filelist)+prev_sentiment_counts[0]
+            postive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Positive'])+prev_sentiment_counts[1]
+            negetive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Negetive'])+prev_sentiment_counts[2]
+            total_days= df_filelist['created_day'].unique().tolist()
+            for day in prev_day_list:
+                total_days.append(day)
+            total_days=list(set(total_days))
+            total_days_count=len(set(total_days))
 
-        prev_sentiment_counts=[total_tweets_count,postive_tweets_count,negetive_tweets_count]
-        prev_day_list= total_days
+            prev_sentiment_counts=[total_tweets_count,postive_tweets_count,negetive_tweets_count]
+            prev_day_list= total_days
+            
             #add KPIs for total tweets and total negetive and positive tweets  
-        '''
             kpi1, kpi2, kpi3,kpi4 = st.columns(4)       
-            kpi1.metric(label="Total Tweets",value=int(total_tweets_count),delta=10)        
-            kpi2.metric(label="Postive Tweets",value=int(postive_tweets_count),delta=10 )
-            kpi3.metric(label="Negetive Tweets",value=int(negetive_tweets_count),delta=-10)
-            kpi4.metric(label="Days Tweets collected",value=int(total_days_count),delta=10)
+            kpi1.metric(label="Total Tweets",value=int(total_tweets_count),delta=total_tweets_count-prev_sentiment_counts[0])        
+            kpi2.metric(label="Postive Tweets",value=int(postive_tweets_count),delta=postive_tweets_count- prev_sentiment_counts[1])
+            kpi3.metric(label="Negetive Tweets",value=int(negetive_tweets_count),delta=-negetive_tweets_count-prev_sentiment_counts[2])
+            kpi4.metric(label="Days Tweets collected",value=int(total_days_count),delta=total_days_count-len(prev_day_list))
             # add charts and tables
             fig_col1, fig_col2 = st.columns(2)
 
             with fig_col1:
                 st.markdown("### Tweet Sentiment by Day")
                 fig1=plt.figure(figsize=(10,4))
-                sns.lineplot(data=df_sentiment_day, x='created_day', y='count', hue='model_api_sentiment')
+                sns.lineplot(data=df_sentiment_day, x='created_day', y='sum', hue='model_api_sentiment')
                 st.pyplot(fig1)
                 st.markdown("### Tweets Sentiment by Month table ")
-                st.table(df_sentiment_month[['created_month','model_api_sentiment','count']])
+                st.table(df_sentiment_month[['created_month','model_api_sentiment','sum']])
             
             with fig_col2:
                 st.markdown("### Tweets by Source")
@@ -178,14 +180,15 @@ def create_latest_dffiles(counter=-1):
                 st.pyplot(fig2)
                 st.markdown("### Tweets by source ")
                 st.table(df_source)
-        '''
+            
     else:
         print(f"No file in s3 location : {s3_bucket}/{s3_folder} after latest timestamp of {last_procesed_ts}")
         check_new_files_flag=0
+    initial_run_flag=0
     return check_new_files_flag
 
 #main
-'''
+
 st.set_page_config(
         page_title="Dashboard for Tweet Sentiment",
         page_icon="✅",
@@ -193,13 +196,14 @@ st.set_page_config(
         )
 st.title("Dashboard for tweet Sentiment")
 placeholder = st.empty()
-'''
+
 config_path=Path(__file__).resolve().parents[0] / 'dashboard.ini'
 s3_resource=boto3.resource('s3')
 default_ts='1973-01-01 00:00:00'
 columns=['tweet_id', 'created_at', 'text', 'extended_tweet_text', 'source','user', 'followers_count', 'friends_count', 'geo_enabled', 'time_zone','geo', 'coordinates','model_api_sentiment','source_cleaned']
 
 # initilalze the previous  run dataframes
+initial_run_flag=1
 check_new_files_flag=1
 last_procesed_ts=None
 prev_sentiment_counts=[0,0,0]
@@ -239,14 +243,14 @@ get_dfs_s3()
 print(f'version 3 {prev_df_sentiment_day}')
 while check_new_files_flag:
         check_new_files_flag=create_latest_dffiles(last_procesed_ts)
-        #print('sleeping')
-        #time.sleep(30)
-        #print('waking up')
+        print('sleeping')
+        time.sleep(30)
+        print('waking up')
 
 save_df_as_files(s3_bucket,file_loc_day_df,prev_df_sentiment_day)
 save_df_as_files(s3_bucket,file_loc_month_df,prev_df_sentiment_month)
 save_df_as_files(s3_bucket,file_loc_source_df,prev_df_source)
 save_df_as_files(s3_bucket,file_loc_day_list,pd.DataFrame(prev_day_list,columns=['day']))
 save_df_as_files(s3_bucket,file_loc_sentiment_counts,pd.DataFrame(prev_sentiment_counts,columns=['count']))
-#save_latest_ts_s3(s3_file_ts,last_procesed_ts)
+save_latest_ts_s3(s3_file_ts,last_procesed_ts)
     
