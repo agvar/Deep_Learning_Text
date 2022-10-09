@@ -64,7 +64,7 @@ def read_tweet_stream(s3_resource,kinesis_client,stream_name,sentiment_predictio
                             if prediction>0.5:
                               predict_out='Positive'
                             else:
-                              predict_out='Negetive'
+                              predict_out='Negative'
                             tweet['model_api_sentiment'] = predict_out
                             source_cleaned=re.match(r'.*>(.*)<.*',tweet_text).group(1)
                             if 'android' in source_cleaned.lower():

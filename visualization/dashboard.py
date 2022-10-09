@@ -25,6 +25,7 @@ def get_latest_ts_s3(s3_bucket,file_loc_ts_s3) :
         s3_resource.Object(s3_bucket,file_loc_ts_s3).load()    
         s3_file_ts=s3_resource.Object(s3_bucket,file_loc_ts_s3)
         last_procesed_ts=datetime.strptime(s3_file_ts.get()['Body'].read().decode('utf-8'),'%Y-%m-%d %H:%M:%S') 
+        print(f'last_procesed_ts{last_procesed_ts}')
     except ClientError: 
         print(f"s3 latest timestamp not found , using default date of {default_ts}")
         last_procesed_ts=datetime.strptime(default_ts,'%Y-%m-%d %H:%M:%S') 
@@ -33,7 +34,7 @@ def get_latest_ts_s3(s3_bucket,file_loc_ts_s3) :
 
 def get_dfs_s3() :
     '''
-    Retrieves the latest dataframes that were saved to file
+    Retrieves the latest dataframes and counts that were saved to file
     '''
     global prev_df_sentiment_day
     global prev_df_sentiment_month
@@ -55,7 +56,7 @@ def get_dfs_s3() :
         print(prev_sentiment_counts)
         print(prev_day_list)
     except ClientError: 
-        print(f"older version of counts or source list files not found, using defaults")
+        print(f"older version of counts  files not found, using defaults")
    
 
 
@@ -100,6 +101,7 @@ def create_latest_dffiles(counter=-1):
     global prev_day_list
     global initial_run_flag
 
+    print('starting diff process')
     print(f'check last_procesed_ts{last_procesed_ts}')
     for file in s3_resource.Bucket(s3_bucket).objects.filter(Prefix=s3_folder):
         file_last_mod_ts=file.last_modified.replace(tzinfo = None)
@@ -114,14 +116,15 @@ def create_latest_dffiles(counter=-1):
                     counter+=1
             except Exception as e:
                 print(f"Error reading file: {e}")
-    
-    if not(df_filelist.empty) or (initial_run_flag):
+    print(f'length of filelist df {len(df_filelist)}')
+    if not(df_filelist.empty) or (initial_run_flag ):
+        print('entering df and rensing calc')
         if not(df_filelist.empty):  
             last_procesed_ts=ts_list[-1] 
         print(f'assign last_procesed_ts{last_procesed_ts}')
         check_new_files_flag=1
         with placeholder.container():
-        #create dataframe and values
+            #create dataframe and values
             df_filelist['created_day']= pd.to_datetime(df_filelist.created_at).dt.date
             df_filelist['created_month']= pd.to_datetime(df_filelist.created_at).dt.month
 
@@ -129,7 +132,7 @@ def create_latest_dffiles(counter=-1):
             df_sentiment_day=df_filelist.groupby(['model_api_sentiment','created_day'])['tweet_id'].agg(['count']).reset_index() 
             df_sentiment_month=df_filelist.groupby(['model_api_sentiment','created_month'])['tweet_id'].agg(['count']).reset_index() 
             df_source=df_filelist.groupby(['source_cleaned'])['tweet_id'].agg(['count']).reset_index() 
-    
+
 
             #concat latest dataframe to previous dataframes 
             df_sentiment_day=pd.concat([df_sentiment_day,prev_df_sentiment_day])
@@ -146,7 +149,7 @@ def create_latest_dffiles(counter=-1):
             #add current counts to previous counts
             total_tweets_count=len(df_filelist)+prev_sentiment_counts[0]
             postive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Positive'])+prev_sentiment_counts[1]
-            negetive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Negetive'])+prev_sentiment_counts[2]
+            negetive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Negative'])+prev_sentiment_counts[2]
             total_days= df_filelist['created_day'].unique().tolist()
             for day in prev_day_list:
                 total_days.append(day)
@@ -156,11 +159,12 @@ def create_latest_dffiles(counter=-1):
             prev_sentiment_counts=[total_tweets_count,postive_tweets_count,negetive_tweets_count]
             prev_day_list= total_days
             
+            
             #add KPIs for total tweets and total negetive and positive tweets  
             kpi1, kpi2, kpi3,kpi4 = st.columns(4)       
             kpi1.metric(label="Total Tweets",value=int(total_tweets_count),delta=total_tweets_count-prev_sentiment_counts[0])        
             kpi2.metric(label="Postive Tweets",value=int(postive_tweets_count),delta=postive_tweets_count- prev_sentiment_counts[1])
-            kpi3.metric(label="Negetive Tweets",value=int(negetive_tweets_count),delta=-negetive_tweets_count-prev_sentiment_counts[2])
+            kpi3.metric(label="Negative Tweets",value=int(negetive_tweets_count),delta=-negetive_tweets_count-prev_sentiment_counts[2])
             kpi4.metric(label="Days Tweets collected",value=int(total_days_count),delta=total_days_count-len(prev_day_list))
             # add charts and tables
             fig_col1, fig_col2 = st.columns(2)
@@ -184,6 +188,7 @@ def create_latest_dffiles(counter=-1):
     else:
         print(f"No file in s3 location : {s3_bucket}/{s3_folder} after latest timestamp of {last_procesed_ts}")
         check_new_files_flag=0
+    
     initial_run_flag=0
     return check_new_files_flag
 

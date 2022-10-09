@@ -45,19 +45,20 @@ def read_tweet_s3(s3_resource,sentiment_prediction_endpoint):
                             if prediction>0.5:
                               predict_out='Positive'
                             else:
-                              predict_out='Negetive'
+                              predict_out='Negative'
                             tweet['model_api_sentiment'] = predict_out
                             source_cleaned=re.match(r'.*>(.*)<.*',tweet['source']).group(1)
                             if 'android' in source_cleaned.lower():
                                 tweet['source_cleaned']='Android'
-                            if 'iphone' in source_cleaned.lower():
+                            elif 'iphone' in source_cleaned.lower():
                                 tweet['source_cleaned']='Iphone'
-                            if 'mac' in source_cleaned.lower():
+                            elif 'mac' in source_cleaned.lower():
                                 tweet['source_cleaned']='Mac'
-                            if 'ipad' in source_cleaned.lower():
+                            elif 'ipad' in source_cleaned.lower():
                                 tweet['source_cleaned']='Ipad'                               
                             else:
                                 tweet['source_cleaned']='Web'  
+                           
                         except Exception as e:
                             print(f'unable to post request on {sentiment_prediction_endpoint}  : {e}') 
                             sys.exit(1)
