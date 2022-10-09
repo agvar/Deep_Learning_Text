@@ -20,32 +20,43 @@ def get_latest_ts_s3(s3_bucket,file_loc_ts_s3) :
     '''
     Retrieves the latest processed timestamp that was saved to file
     '''
+    global last_procesed_ts
     try:
         s3_resource.Object(s3_bucket,file_loc_ts_s3).load()    
         s3_file_ts=s3_resource.Object(s3_bucket,file_loc_ts_s3)
-        ts_latest_s3=datetime.strptime(s3_file_ts.get()['Body'].read().decode('utf-8'),'%Y-%m-%d %H:%M:%S') 
+        last_procesed_ts=datetime.strptime(s3_file_ts.get()['Body'].read().decode('utf-8'),'%Y-%m-%d %H:%M:%S') 
     except ClientError: 
         print(f"s3 latest timestamp not found , using default date of {default_ts}")
-        ts_latest_s3=datetime.strptime(default_ts,'%Y-%m-%d %H:%M:%S') 
-    return ts_latest_s3
+        last_procesed_ts=datetime.strptime(default_ts,'%Y-%m-%d %H:%M:%S') 
 
 
-def get_dfs_s3(s3_bucket,s3_file_day_df,s3_file_month_df,s3_file_source_df) :
+
+def get_dfs_s3() :
     '''
     Retrieves the latest dataframes that were saved to file
     '''
     global prev_df_sentiment_day
     global prev_df_sentiment_month
-    global prev_df_sentiment_source
+    global prev_df_source
+    global prev_sentiment_counts
+    global prev_day_list
     try:
-        prev_df_sentiment_day=pd.read_csv(s3_file_day_df.get()['Body'].read().decode('utf-8'))
-        prev_df_sentiment_month=s3_file_month_df.get()['Body'].read().decode('utf-8')
-        prev_df_sentiment_source=s3_file_source_df.get()['Body'].read().decode('utf-8')
+        prev_df_sentiment_day=pd.read_csv(StringIO(s3_file_day_df.get()['Body'].read().decode('utf-8')))
+        prev_df_sentiment_month=pd.read_csv(StringIO(s3_file_month_df.get()['Body'].read().decode('utf-8')))
+        prev_df_source=pd.read_csv(StringIO(s3_file_source_df.get()['Body'].read().decode('utf-8')))
     except ClientError: 
         print(f"older version of dataframes files not found, using defaults")
-        print(f"error :{traceback.format_exc()}")
-        #sys.exit(1)
-    print("insde funct",{prev_df_sentiment_day})
+    
+    try:
+        prev_sentiment_counts=pd.read_csv(StringIO(s3_file_sentiment_counts.get()['Body'].read().decode('utf-8')))
+        prev_sentiment_counts=prev_sentiment_counts['count'].values.tolist()
+        prev_day_list=pd.read_csv(StringIO(s3_file_day_list.get()['Body'].read().decode('utf-8')))
+        prev_day_list=prev_day_list['day'].values.tolist()
+        print(prev_sentiment_counts)
+        print(prev_day_list)
+    except ClientError: 
+        print(f"older version of counts or source list files not found, using defaults")
+   
 
 
 def save_latest_ts_s3(s3_file_ts,latest_ts_updated):
@@ -62,17 +73,17 @@ def save_latest_ts_s3(s3_file_ts,latest_ts_updated):
     else:
         print("no file to save")
 
-def save_df_as_files(s3_bucket,file_loc,df):
+def save_df_as_files(s3_bucket,file_loc,data):
         try:
             csv_buffer = StringIO()
-            df.to_csv(csv_buffer)
+            data.to_csv(csv_buffer)
             s3_resource = boto3.resource('s3')
             s3_resource.Object(s3_bucket, file_loc).put(Body=csv_buffer.getvalue())
-            print(f'saving dataframe  {df} as {file_loc}')
+            print(f'saving dataframe  {data} as {file_loc}')
         except ClientError as e:
-                print(f"Unable to save dataframe {df} to file")
+                print(f"Unable to save dataframe {data} to file")
 
-def create_latest_dffiles(ts_latest_s3,counter=-1):   
+def create_latest_dffiles(counter=-1):   
     '''
     reads incremental file into a dataframe. The last_modified time of the file is compared to the saved timestamp,
     to determine if the file needs to be read from.
@@ -81,14 +92,17 @@ def create_latest_dffiles(ts_latest_s3,counter=-1):
     ts_list=[]
     counter=0
     df_filelist=pd.DataFrame(columns=columns)
-    print(f"latest timestamp : {ts_latest_s3}")
     global prev_df_sentiment_day
     global prev_df_sentiment_month
-    global prev_df_sentiment_source
+    global prev_df_source
+    global last_procesed_ts
+    global prev_sentiment_counts
+    global prev_day_list
 
+    print(f'check last_procesed_ts{last_procesed_ts}')
     for file in s3_resource.Bucket(s3_bucket).objects.filter(Prefix=s3_folder):
         file_last_mod_ts=file.last_modified.replace(tzinfo = None)
-        if file_last_mod_ts > ts_latest_s3:           
+        if file_last_mod_ts > last_procesed_ts:           
             try:
                 data=file.get()['Body'].read()
                 if data:
@@ -101,7 +115,8 @@ def create_latest_dffiles(ts_latest_s3,counter=-1):
                 print(f"Error reading file: {e}")
     
     if not df_filelist.empty:
-        latest_ts_updated=ts_list[-1] 
+        last_procesed_ts=ts_list[-1] 
+        print(f'assign last_procesed_ts{last_procesed_ts}')
         check_new_files_flag=1
         #with placeholder.container():
         #create dataframe and values
@@ -114,24 +129,30 @@ def create_latest_dffiles(ts_latest_s3,counter=-1):
         df_source=df_filelist.groupby(['source_cleaned'])['tweet_id'].agg(['count']).reset_index() 
    
 
-        #add counts from previous runs for the first run
+        #concat latest dataframe to previous dataframes 
         df_sentiment_day=pd.concat([df_sentiment_day,prev_df_sentiment_day])
         df_sentiment_day=df_sentiment_day.groupby(['model_api_sentiment','created_day'])['count'].agg(['sum']).reset_index() 
         df_sentiment_month=pd.concat([df_sentiment_month,prev_df_sentiment_month])
-        df_sentiment_month=df_sentiment_month.groupby(['model_api_sentiment','created_day'])['count'].agg(['sum']).reset_index() 
+        df_sentiment_month=df_sentiment_month.groupby(['model_api_sentiment','created_month'])['count'].agg(['sum']).reset_index() 
         df_source=pd.concat([df_source,prev_df_source])
-        df_source=df_source.groupby(['model_api_sentiment','created_day'])['count'].agg(['sum']).reset_index() 
-
+        df_source=df_source.groupby(['source_cleaned'])['count'].agg(['sum']).reset_index() 
+        #assign prev datframes
         prev_df_sentiment_day=df_sentiment_day
         prev_df_sentiment_month=df_sentiment_month
         prev_df_source=df_source
 
-        total_tweets_count=len(df_filelist)
-        postive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Positive'])
-        negetive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Negetive'])
-        total_days= df_filelist['created_day'].unique()   
-        total_days_count=len(total_days)
-            
+        #add current counts to previous counts
+        total_tweets_count=len(df_filelist)+prev_sentiment_counts[0]
+        postive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Positive'])+prev_sentiment_counts[1]
+        negetive_tweets_count=len(df_filelist[df_filelist['model_api_sentiment']=='Negetive'])+prev_sentiment_counts[2]
+        total_days= df_filelist['created_day'].unique().tolist()
+        for day in prev_day_list:
+            total_days.append(day)
+        total_days=list(set(total_days))
+        total_days_count=len(set(total_days))
+
+        prev_sentiment_counts=[total_tweets_count,postive_tweets_count,negetive_tweets_count]
+        prev_day_list= total_days
             #add KPIs for total tweets and total negetive and positive tweets  
         '''
             kpi1, kpi2, kpi3,kpi4 = st.columns(4)       
@@ -159,7 +180,7 @@ def create_latest_dffiles(ts_latest_s3,counter=-1):
                 st.table(df_source)
         '''
     else:
-        print(f"No file in s3 location : {s3_bucket}/{s3_folder} after latest timestamp of {ts_latest_s3}")
+        print(f"No file in s3 location : {s3_bucket}/{s3_folder} after latest timestamp of {last_procesed_ts}")
         check_new_files_flag=0
     return check_new_files_flag
 
@@ -180,11 +201,14 @@ columns=['tweet_id', 'created_at', 'text', 'extended_tweet_text', 'source','user
 
 # initilalze the previous  run dataframes
 check_new_files_flag=1
+last_procesed_ts=None
+prev_sentiment_counts=[0,0,0]
+prev_day_list=[]
 prev_df_sentiment_day=pd.DataFrame(columns=['model_api_sentiment','created_day','count'])
 prev_df_sentiment_month=pd.DataFrame(columns=['model_api_sentiment','created_month','count'])
-prev_df_source=pd.DataFrame(columns=['model_api_sentiment','source_cleaned','count'])
+prev_df_source=pd.DataFrame(columns=['source_cleaned','count'])
 
-print(prev_df_sentiment_day)
+print(f'version 1 {prev_df_sentiment_day}')
 try:
         config=configparser.ConfigParser()       
         config.read(config_path)
@@ -192,10 +216,14 @@ try:
         s3_bucket=config.get('AWS resources','s3_bucket')
         s3_folder=config.get('AWS resources','s3_folder_output')
         file_loc_ts_s3=config.get('AWS resources','file_loc_ts_s3')
+        file_loc_sentiment_counts=config.get('AWS resources','file_loc_sentiment_counts')
+        file_loc_day_list=config.get('AWS resources','file_loc_day_list')
         file_loc_day_df=config.get('AWS resources','file_loc_day_df')
         file_loc_month_df=config.get('AWS resources','file_loc_month_df')
         file_loc_source_df=config.get('AWS resources','file_loc_source_df')
         s3_file_ts=s3_resource.Object(s3_bucket,file_loc_ts_s3)
+        s3_file_sentiment_counts=s3_resource.Object(s3_bucket,file_loc_sentiment_counts)
+        s3_file_day_list=s3_resource.Object(s3_bucket,file_loc_day_list)
         s3_file_day_df=s3_resource.Object(s3_bucket,file_loc_day_df)
         s3_file_month_df=s3_resource.Object(s3_bucket,file_loc_month_df)
         s3_file_source_df=s3_resource.Object(s3_bucket,file_loc_source_df)
@@ -205,17 +233,20 @@ except Exception as e:
         sys.exit(1)
 
 #check the previous timestamps and dataframes 
-ts_latest_s3=get_latest_ts_s3(s3_bucket,file_loc_ts_s3)
-get_dfs_s3(s3_bucket,s3_file_day_df,s3_file_month_df,s3_file_source_df)
-
+#ts_latest_s3
+get_latest_ts_s3(s3_bucket,file_loc_ts_s3)
+get_dfs_s3()
+print(f'version 3 {prev_df_sentiment_day}')
 while check_new_files_flag:
-        check_new_files_flag=create_latest_dffiles(ts_latest_s3)
+        check_new_files_flag=create_latest_dffiles(last_procesed_ts)
         #print('sleeping')
         #time.sleep(30)
         #print('waking up')
 
 save_df_as_files(s3_bucket,file_loc_day_df,prev_df_sentiment_day)
 save_df_as_files(s3_bucket,file_loc_month_df,prev_df_sentiment_month)
-save_df_as_files(s3_bucket,file_loc_source_df,prev_df_sentiment_source)
-#save_latest_ts_s3(s3_file_ts,latest_ts_updated)
+save_df_as_files(s3_bucket,file_loc_source_df,prev_df_source)
+save_df_as_files(s3_bucket,file_loc_day_list,pd.DataFrame(prev_day_list,columns=['day']))
+save_df_as_files(s3_bucket,file_loc_sentiment_counts,pd.DataFrame(prev_sentiment_counts,columns=['count']))
+#save_latest_ts_s3(s3_file_ts,last_procesed_ts)
     
