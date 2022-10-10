@@ -69,11 +69,11 @@ def read_tweet_stream(s3_resource,kinesis_client,stream_name,sentiment_predictio
                             source_cleaned=re.match(r'.*>(.*)<.*',tweet_text).group(1)
                             if 'android' in source_cleaned.lower():
                                 tweet['source_cleaned']='Android'
-                            if 'iphone' in source_cleaned.lower():
+                            elif 'iphone' in source_cleaned.lower():
                                 tweet['source_cleaned']='Iphone'
-                            if 'mac' in source_cleaned.lower():
+                            elif 'mac' in source_cleaned.lower():
                                 tweet['source_cleaned']='Mac'
-                            if 'ipad' in source_cleaned.lower():
+                            elif 'ipad' in source_cleaned.lower():
                                 tweet['source_cleaned']='Ipad'                               
                             else:
                                 tweet['source_cleaned']='Web'                               
