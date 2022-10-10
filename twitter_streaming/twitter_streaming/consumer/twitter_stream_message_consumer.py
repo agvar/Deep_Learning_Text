@@ -66,7 +66,8 @@ def read_tweet_stream(s3_resource,kinesis_client,stream_name,sentiment_predictio
                             else:
                               predict_out='Negative'
                             tweet['model_api_sentiment'] = predict_out
-                            source_cleaned=re.match(r'.*>(.*)<.*',tweet_text).group(1)
+                             
+                            source_cleaned=re.match(r'.*>(.*)<.*',tweet['source']).group(1)
                             if 'android' in source_cleaned.lower():
                                 tweet['source_cleaned']='Android'
                             elif 'iphone' in source_cleaned.lower():
@@ -76,7 +77,7 @@ def read_tweet_stream(s3_resource,kinesis_client,stream_name,sentiment_predictio
                             elif 'ipad' in source_cleaned.lower():
                                 tweet['source_cleaned']='Ipad'                               
                             else:
-                                tweet['source_cleaned']='Web'                               
+                                tweet['source_cleaned']='Web'                             
                                 
                             
                         except Exception as e:
