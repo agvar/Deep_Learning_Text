@@ -121,7 +121,7 @@ def create_latest_dffiles(counter=-1):
         #with placeholder.container():
             #create dataframe and values
         df_filelist['created_day']= pd.to_datetime(df_filelist.created_at).dt.date
-        df_filelist['created_month']= pd.to_datetime(df_filelist.created_at).dt.strftime("%B-%Y")
+        df_filelist['created_month']= pd.to_datetime(df_filelist.created_at).dt.strftime("%y-%m")
 
 
         df_sentiment_day=df_filelist.groupby(['model_api_sentiment','created_day'])['tweet_id'].agg(['count']).reset_index().rename(columns={'count':'sum'})
@@ -178,15 +178,15 @@ def create_latest_dffiles(counter=-1):
 
         with fig_col1:
             st.markdown("### Tweet Sentiment by Month")
-            fig1=plt.figure(figsize=(10,4))
-            sns.lineplot(data=df_sentiment_month, x='created_month', y='sum', hue='model_api_sentiment')
+            fig1=plt.figure()
+            sns.scatterplot(data=df_sentiment_month, x='created_month', y='sum', hue='model_api_sentiment')
             st.pyplot(fig1)
             st.markdown("### Tweets Sentiment by Month table ")
             st.table(df_sentiment_month[['created_month','model_api_sentiment','sum']].sort_values(by='created_month'))
         
         with fig_col2:
             st.markdown("### Tweets by Source")
-            fig2,ax=plt.subplots(figsize=(10,4))
+            fig2,ax=plt.subplots()
             sns.stripplot(data=df_source,x='source_cleaned',y='sum')
             st.pyplot(fig2)
             st.markdown("### Tweets by source ")
