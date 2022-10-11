@@ -179,7 +179,7 @@ def create_latest_dffiles(counter=-1):
         with fig_col1:
             st.markdown("### Tweet Sentiment by Month")
             fig1=plt.figure()
-            sns.scatterplot(data=df_sentiment_month, x='created_month', y='sum', hue='model_api_sentiment')
+            sns.lineplot(data=df_sentiment_month, x='created_month', y='sum', hue='model_api_sentiment')
             st.pyplot(fig1)
             st.markdown("### Tweets Sentiment by Month table ")
             st.table(df_sentiment_month[['created_month','model_api_sentiment','sum']].sort_values(by='created_month'))
