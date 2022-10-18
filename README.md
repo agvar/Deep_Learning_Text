@@ -27,7 +27,7 @@ To install the ML prediction analysis,notebook ,data preprocessing -> pip instal
 
 ## Process Flow
 
-![Architecture Diagram](https://github.com/agvar/Deep_learning_Text/blob/master/images/capstone_project_architecture.jpeg)
+![Architecture Diagram](https://github.com/agvar/Deep_Learning_Text/blob/759f9643dfa38685bf119824ce07c7ab1086d662/images/deep_learning_project_architecture.jpeg)
 
 ## Data Analysis
 
