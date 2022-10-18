@@ -22,8 +22,8 @@ The raw tweets and the predictions are stored on AWS S3 as json files
 ## Installation
 
 To install the prediction api -> (https://github.com/agvar/Deep_learning_Text/blob/master/Prediction_API/README )
-To install the twitter consumer and producer -> pip install -r requirements.txt  
-To install the ML prediction analysis,notebook ,data preprocessing -> pip install -r requirements.txt
+To install the twitter consumer and producer ->  
+To install the Deep Learning BERT analysis,notebook ,data preprocessing ->
 
 ## Process Flow
 
