@@ -16,7 +16,6 @@ The raw tweets and the predictions are stored on AWS S3 as json files
 - [Process Flow](#process-flow)
 - [Data Analysis](#data-analysis)
 - [Project Organization](#project-organization)
-- [Credits](#credits)
 - [License](#license)
 
 ## Installation
@@ -31,7 +30,7 @@ To install the Deep Learning BERT analysis,notebook ,data preprocessing ->
 
 ## Data Analysis
 
-The analysis done on the twitter train datasets is at : https://github.com/agvar/Prediction_Text/blob/2acd88106dab4106de90d4dc10e5608af0af78c7/Sentiment_Prediction_DS/notebooks/Sentiment_analysis.ipynb
+The analysis done on the twitter train datasets is at : [Data Analysis](https://github.com/agvar/Prediction_Text/blob/2acd88106dab4106de90d4dc10e5608af0af78c7/Sentiment_Prediction_DS/notebooks/Sentiment_analysis.ipynb)
 
 ## Project Organization
 
@@ -42,6 +41,6 @@ The analysis done on the twitter train datasets is at : https://github.com/agvar
     ├── twitter_streaming          <- consumer and producer modules for reading from tweepy and writing to Kineses, S3
     └── images                     <- images,diagrams for the project
 
-## Credits
-
 ## License
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
