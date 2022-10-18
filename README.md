@@ -1,4 +1,4 @@
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?style=for-the-badge&logo=jupyter&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?style=for-the-badge&logo=jupyter&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![Keras](https://img.shields.io/badge/Keras-%23D00000.svg?style=for-the-badge&logo=Keras&logoColor=white)
 
 # Twitter Sentiment Prediction
 
@@ -16,6 +16,7 @@ The raw tweets and the predictions are stored on AWS S3 as json files
 - [Process Flow](#process-flow)
 - [Data Analysis](#data-analysis)
 - [Project Organization](#project-organization)
+- [Credits](#credits)
 - [License](#license)
 
 ## Installation
@@ -40,6 +41,10 @@ The analysis done on the twitter train datasets is at : [Data Analysis](https://
     ├── Deep_Learning_DS           <- Python notebooks ,models folder
     ├── twitter_streaming          <- consumer and producer modules for reading from tweepy and writing to Kineses, S3
     └── images                     <- images,diagrams for the project
+
+## Credits
+
+https://ileriayo.github.io/markdown-badges/
 
 ## License
 
