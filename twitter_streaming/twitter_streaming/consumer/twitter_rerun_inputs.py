@@ -11,6 +11,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from scipy.stats import logistic
 import re
+import numpy as np
 
 
 def save_tweet_s3(s3_resource,data_list,s3_bucket,s3_output_folder):
@@ -41,11 +42,19 @@ def read_tweet_s3(s3_resource,sentiment_prediction_endpoint):
                             data = json.dumps({"signature_name": "serving_default", "instances": [tweet_text]})                          
                             json_response = requests.post(sentiment_prediction_endpoint, data=data, headers=predict_api_headers)
                             sentiment_prediction = json.loads(json_response.text).get('predictions')
-                            prediction=logistic.cdf(sentiment_prediction[0][0])
+                            '''prediction=logistic.cdf(sentiment_prediction[0][0])
                             if prediction>0.5:
                               predict_out='Positive'
                             else:
                               predict_out='Negative'
+                            '''
+                            prediction=np.argmax(sentiment_prediction)
+                            if prediction==2:
+                               predict_out='Positive'
+                            elif prediction:
+                                predict_out='Neutral'
+                            else:
+                                predict_out='Negative'
                             tweet['model_api_sentiment'] = predict_out
                             source_cleaned=re.match(r'.*>(.*)<.*',tweet['source']).group(1)
                             if 'android' in source_cleaned.lower():
