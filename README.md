@@ -6,7 +6,7 @@
 
 The project was created as part of the Springboard Machine Learning Bootcamp capstone project.  
 It predicts the sentiment ( positive, negetive,neutral ) on real-time tweets . Tweets are read using the tweepy API with a python Producer process, and pushed into a Kinesis data stream . A consumer python process reads the tweets and calls the prediction API to predict the sentiment.  
-The API is a TensorFlow Serving application that uses a BERT model to make predictions. The response predications are displayed on a Streamlit to depict trends.  
+The API is a TensorFlow Serving application that uses a BERT model along with a classifier to make predictions. The response predications are displayed on a Streamlit to depict trends.  
 The twitter topic to be used when pulling tweets can be configured ,along with the number of tweets to be pulled, at a time.
 The raw tweets and the predictions are stored on AWS S3 as json files
 
@@ -21,7 +21,38 @@ The raw tweets and the predictions are stored on AWS S3 as json files
 
 ## Installation
 
-To install the prediction api -> (https://github.com/agvar/Deep_learning_Text/blob/master/Prediction_API/README )
+To install the Tensorflow serving model
+Login to AWS and create an EC2 instance.
+The one that was used for the project was a Deep Learning AMI GPU TensorFlow 2.10.0 on Amazon Linux, which had most of the deep learning libraries pre-installed.
+
+Connect to the instance using the EC2 key-pair
+ssh -i "path/.ssh/<ec2keypair>" ec2-user@<public dns>
+
+If Docker is not installed on the EC2 machine, follow the below installation steps:
+
+Installation of docker on ec2( if the ec2 is an amazon linux machine)
+-Update the packages on your instance -[ec2-user ~]$ sudo yum update -y
+Install Docker
+[ec2-user ~]$ sudo yum install docker -y
+
+Start the Docker Service on EC2
+[ec2-user ~]$ sudo service docker start
+
+Pull docker image for TensorFlow serving
+(note: When trying to use the latest docker image-tensorflow/serving:latest - we encountered a memory error)
+sudo docker pull tensorflow/serving:2.8.0
+
+Grant permission to access s3 from ec2:
+https://aws.amazon.com/premiumsupport/knowledge-center/ec2-instance-access-s3-bucket/
+
+Copy the model from s3 to ec2
+aws s3 cp s3://dataset20200101projectfiles/models/ . --recursive
+(Note: When trying to access the s3 location of the saved model,we encountered an error with tensorflow having access issues with S3)
+
+Run the following Docker container run command , using 8501 as the port
+
+Add port 8501 in the security group for inbound traffic from local machine
+
 To install the twitter consumer and producer ->  
 To install the Deep Learning BERT analysis,notebook ,data preprocessing ->
 
