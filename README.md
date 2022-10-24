@@ -21,7 +21,7 @@ The raw tweets and the predictions are stored on AWS S3 as json files
 
 ## Installation
 
-Clone the repository
+Clone the repository  
 `git clone git@github.com:agvar/Deep_Learning_Text.git`
 
 #### Data Collection, Preparation,Model selection, Model training
@@ -32,17 +32,22 @@ This used the BERT model from the tensorflow hub
 [Notebook for Analysis using BERT+classifier for Postive ,Negetive and Neutral sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_v3.ipynb)
 
 Other models that were considered are as follows:
-The previous model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,and Negetive sentiment trained on the twitter 140 sentiment data()
+
+1. The previous model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,and Negetive sentiment trained on the twitter 140 sentiment data()
 
 [Notebook for initial Analysis](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras.ipynb)
 
-Other models that were considered are as follows:
-Detailed analysis , model selection using tensorflow (multiple ways of reading input)
-[Notebook for Analysis using BERT+classifier for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_cleaned.ipynb)
+2. Detailed analysis , model selection using tensorflow (multiple ways of reading input)  
+   [Notebook for Analysis using BERT+classifier for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_cleaned.ipynb)
 
-Analyse using Hugging Face transformers model with tensorflow:
+3. Analyze using Hugging Face transformers model with tensorflow:  
+   [Notebook for Hugging Face for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis.ipynb)
 
-Analyse using Doc2Vec with gensim
+4. Analyse using Hugging Face transformers model with tensorflow on Google Colab:  
+   [Colab Notebook for Hugging Face for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Colab_Deep_Learning_BERT_Sentiment_Analysis.ipynb)
+
+5. Analyse using Doc2Vec with gensim  
+   [Notebook for Analysis using doc2vec](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Deep_Learning_Doc2vec_Sentiment_Analysis.ipynb)
 
 #### Running the Tensor Flow model on local
 
@@ -67,15 +72,15 @@ The one that was used for the project was a Deep Learning AMI GPU TensorFlow 2.1
 Connect to the instance using the EC2 key-pair  
 `ssh -i "path/.ssh/<ec2keypair>" ec2-user@<public dns> `
 
-Update the packages on the EC2 instance
+Update the packages on the EC2 instance  
 `-[ec2-user ~]$ sudo yum update -y `  
-If Docker is not installed on the EC2 machine, follow the below installation steps:
-`[ec2-user ~]$ sudo yum install docker -y `
+If Docker is not installed on the EC2 machine, follow the below installation steps:  
+`[ec2-user ~]$ sudo yum install docker -y `  
 Start the Docker Service on EC2  
 `[ec2-user ~]$ sudo service docker start `
 
 Pull docker image for TensorFlow serving  
-`sudo docker pull tensorflow/serving:2.8.0`
+`sudo docker pull tensorflow/serving:2.8.0`  
 (note: When trying to use the latest docker image-tensorflow/serving:latest - a memory error was encountered)
 
 Grant permission to access s3 from ec2:  
