@@ -5,8 +5,8 @@
 ## Description
 
 The project was created as part of the Springboard Machine Learning Bootcamp capstone project.  
-It predicts the sentiment ( positive, negetive,neutral ) on real-time tweets ,read using the tweepy API with a python Producer process.The tweets are pushed into a Kinesis data stream from where a a consumer python process reads thm and calls the prediction API to predict the sentiment.  
-The API is a TensorFlow Serving application that uses a BERT model and a classifier layer on top to make predictions. The response predications are displayed on a Streamlit dashboard to depict trends.  
+It predicts the sentiment ( positive, negetive,neutral ) on real-time tweets ,read using the tweepy API with a python Producer process.The tweets are pushed into a Kinesis data stream from where a python Consumer process reads them and invokes the Tensorflow Serving API to predict the sentiment.  
+The TensorFlow Serving application uses a BERT model and a classifier layer on top to make predictions. The response predications are displayed on a Streamlit dashboard to depict trends.  
 The twitter topic to be used when pulling tweets can be configured ,along with the number of tweets to be pulled, at a time.
 The raw tweets and the predictions are stored on AWS S3 as json files
 
@@ -28,18 +28,18 @@ The raw tweets and the predictions are stored on AWS S3 as json files
 
 Datasets used:
 
-1. Sentiment140 Dataset Details
-   **Source** : http://help.sentiment140.com/for-students
+1. Sentiment140 Dataset Details  
+   **Source** : http://help.sentiment140.com/for-students  
    **Description**: The training data was automatically created, as opposed to having humans manual annotate tweets. In the approach used, any tweet with positive emoticons, like :), were positive, and tweets with negative emoticons, like :(, were negative. We used the Twitter Search API to collect these tweets by using keyword search. This is described in the following paper(https://cs.stanford.edu/people/alecmgo/papers/TwitterDistantSupervision09.pdf) The data is a CSV with emoticons removed.
-2. Twitter Airline Sentiment Dataset
-   **Source** -https://www.kaggle.com/crowdflower/twitter-airline-sentiment
+2. Twitter Airline Sentiment Dataset  
+   **Source** -https://www.kaggle.com/crowdflower/twitter-airline-sentiment  
    **Description** :This data originally came from Crowdflower's Data for Everyone library.
    As the original source says,a sentiment analysis job about the problems of each major U.S. airline. Twitter data was scraped from February of 2015 and contributors were asked to first classify positive, negative, and neutral tweets, followed by categorizing negative reasons (such as "late flight" or "rude service").
 
 ## Model selection, Model training
 
 The final model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,Negetive and Neutral sentiment, trained on the airline tweet sentiment dataset.
-This used the BERT model from the tensorflow hub:
+This used the BERT model from the tensorflow hub:  
 [Notebook for Analysis using BERT+classifier for Postive ,Negetive and Neutral sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_v3.ipynb)
 
 Other models that were considered are as follows:
@@ -145,6 +145,7 @@ To install the twitter consumer and producer
 ## Credits
 
 https://ileriayo.github.io/markdown-badges/
+https://docs.docker.com/engine/install/
 
 ## License
 
