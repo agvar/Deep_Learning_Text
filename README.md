@@ -12,42 +12,57 @@ The raw tweets and the predictions are stored on AWS S3 as json files
 
 ## Table of Contents
 
-- [Installation](#installation)
 - [Process Flow](#process-flow)
-- [Data Analysis](#data-analysis)
+- [Data Collection, Preparation,](#data-collection,-preparation)
+- [Model selection, Model training](#model-selection,-Model-training)
+- [Installation](#installation)
 - [Project Organization](#project-organization)
 - [Credits](#credits)
 - [License](#license)
+
+## Process Flow
+
+![Architecture Diagram](https://github.com/agvar/Deep_Learning_Text/blob/759f9643dfa38685bf119824ce07c7ab1086d662/images/deep_learning_project_architecture.jpeg)
+
+## Data Collection, Preparation
+
+Datasets used:
+
+1. Sentiment140 Dataset Details
+   **Source** : http://help.sentiment140.com/for-students
+   **Description**: The training data was automatically created, as opposed to having humans manual annotate tweets. In the approach used, any tweet with positive emoticons, like :), were positive, and tweets with negative emoticons, like :(, were negative. We used the Twitter Search API to collect these tweets by using keyword search. This is described in the following paper(https://cs.stanford.edu/people/alecmgo/papers/TwitterDistantSupervision09.pdf) The data is a CSV with emoticons removed.
+2. Twitter Airline Sentiment Dataset
+   **Source** -https://www.kaggle.com/crowdflower/twitter-airline-sentiment
+   **Description** :This data originally came from Crowdflower's Data for Everyone library.
+   As the original source says,a sentiment analysis job about the problems of each major U.S. airline. Twitter data was scraped from February of 2015 and contributors were asked to first classify positive, negative, and neutral tweets, followed by categorizing negative reasons (such as "late flight" or "rude service").
+
+## Model selection, Model training
+
+The final model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,Negetive and Neutral sentiment, trained on the airline tweet sentiment dataset.
+This used the BERT model from the tensorflow hub:
+[Notebook for Analysis using BERT+classifier for Postive ,Negetive and Neutral sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_v3.ipynb)
+
+Other models that were considered are as follows:
+
+1. The previous model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,and Negetive sentiment trained on the twitter 140 sentiment data:  
+   [Notebook for initial Analysis](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras.ipynb)
+
+2. Analysis , model selection using tensorflow (multiple ways of reading input)  
+   [Notebook for Analysis using BERT+classifier for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_cleaned.ipynb)
+
+3. Analysis using Hugging Face transformers model with tensorflow:  
+   [Notebook for Hugging Face for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis.ipynb)
+
+4. Analysis using Hugging Face transformers model with tensorflow on Google Colab:  
+   [Colab Notebook for Hugging Face for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Colab_Deep_Learning_BERT_Sentiment_Analysis.ipynb)
+
+5. Analysis using Doc2Vec with gensim  
+   [Notebook for Analysis using doc2vec](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Deep_Learning_Doc2vec_Sentiment_Analysis.ipynb)
 
 ## Installation
 
 Clone the repository  
 `git clone git@github.com:agvar/Deep_Learning_Text.git`
-
-#### Data Collection, Preparation,Model selection, Model training
-
-The final model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,Negetive and Neutral sentiment, trained on the airline tweet sentiment dataset()
-This used the BERT model from the tensorflow hub
-
-[Notebook for Analysis using BERT+classifier for Postive ,Negetive and Neutral sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_v3.ipynb)
-
-Other models that were considered are as follows:
-
-1. The previous model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,and Negetive sentiment trained on the twitter 140 sentiment data()
-
-[Notebook for initial Analysis](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras.ipynb)
-
-2. Detailed analysis , model selection using tensorflow (multiple ways of reading input)  
-   [Notebook for Analysis using BERT+classifier for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/5810ef018688c973ec6594b9bc29ed8def713692/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis_keras_cleaned.ipynb)
-
-3. Analyze using Hugging Face transformers model with tensorflow:  
-   [Notebook for Hugging Face for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Deep_Learning_BERT_Sentiment_Analysis.ipynb)
-
-4. Analyse using Hugging Face transformers model with tensorflow on Google Colab:  
-   [Colab Notebook for Hugging Face for Postive and Negetive sentiment](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Colab_Deep_Learning_BERT_Sentiment_Analysis.ipynb)
-
-5. Analyse using Doc2Vec with gensim  
-   [Notebook for Analysis using doc2vec](https://github.com/agvar/Deep_Learning_Text/blob/master/deep_learning_DS/notebooks/Deep_Learning_Doc2vec_Sentiment_Analysis.ipynb)
 
 #### Running the Tensor Flow model on local
 
@@ -55,7 +70,27 @@ To install docker: https://docs.docker.com/engine/install/
 
 ##### Download the saved tensorflow model from s3 to local.
 
-The folder structure for th saved models on S3 are as follows:
+The folder structure for the saved tensorflow models on S3 are as follows:
+
+    ├── dataset20200101projectfiles
+        ├── models
+            ├── sentiment_model
+                ├──1                                     <- first sentiment model for only positive and negetive  predictions
+                    ├──assets
+                       ├──vocab.txt
+                    ├──keras_metadata.pb
+                    ├──saved_model.pb
+                    ├──variables
+                       ├──variables.data-00000-of-00001
+                       ├──variables.index
+                ├──2                                      <- latest sentiment model for positive,negetive and neutral predictions
+                    ├──assets
+                       ├──vocab.txt
+                    ├──keras_metadata.pb
+                    ├──saved_model.pb
+                    ├──variables
+                       ├──variables.data-00000-of-00001
+                       ├──variables.index
 
 Create a models folder for the model on local
 `mkdir models`
@@ -97,14 +132,6 @@ Run the following Docker container run command , using 8501 as the port
 Add port 8501 in the security group for inbound traffic from local machine
 
 To install the twitter consumer and producer
-
-## Process Flow
-
-![Architecture Diagram](https://github.com/agvar/Deep_Learning_Text/blob/759f9643dfa38685bf119824ce07c7ab1086d662/images/deep_learning_project_architecture.jpeg)
-
-## Data Analysis
-
-The analysis done on the twitter train datasets is at : [Data Analysis](https://github.com/agvar/Prediction_Text/blob/2acd88106dab4106de90d4dc10e5608af0af78c7/Sentiment_Prediction_DS/notebooks/Sentiment_analysis.ipynb)
 
 ## Project Organization
 
