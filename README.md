@@ -36,7 +36,7 @@ Datasets used:
    **Description** :This data originally came from Crowdflower's Data for Everyone library.
    As the original source says,a sentiment analysis job about the problems of each major U.S. airline. Twitter data was scraped from February of 2015 and contributors were asked to first classify positive, negative, and neutral tweets, followed by categorizing negative reasons (such as "late flight" or "rude service").
 
-## Model selection, Model training
+## Model selection, training
 
 The final model used , is trained in the following notebook which uses BERT+ classification layer to predict Positive,Negetive and Neutral sentiment, trained on the airline tweet sentiment dataset.
 This used the BERT model from the tensorflow hub:  
@@ -92,9 +92,9 @@ The folder structure for the saved tensorflow models on S3 are as follows:
                        ├──variables.data-00000-of-00001
                        ├──variables.index
 
-Create a models folder for the model on local
-`mkdir models`
-Download the model from the s3 location to the models folder on local
+Create a models folder for the model on local  
+`mkdir models`  
+Download the model from the s3 location to the models folder on local  
 `aws s3 cp s3://dataset20200101projectfiles/models/ . --recursive `
 
 `docker run -p 8501:8501 --name sentiment_model --mount type=bind,source=./Deep_Learning_Text/deep_learning_DS/models/sentiment_model,target=/models/sentiment_model -e MODEL_NAME=sentiment_model -t tensorflow/serving:2.8.0`
@@ -131,7 +131,7 @@ Run the following Docker container run command , using 8501 as the port
 
 Add port 8501 in the security group for inbound traffic from local machine
 
-## To install the twitter consumer and producer
+#### Install the AWS Kinesis consumer and producer
 
 `pip install -r requirements.txt`
 
@@ -150,8 +150,8 @@ The consumer process reads tweets from Kinesis and calls the tensorFlow api to m
 
 #### To run the dashboard using Streamlit
 
-For installation steps for Streamlit -> [ Streamlit installation ](https://github.com/agvar/Deep_Learning_Text/blob/master/visualization/readme.md)
-In the Anaconda Navigator terminal that appears :
+For installation steps for Streamlit on windows -> [ Streamlit installation ](https://github.com/agvar/Deep_Learning_Text/blob/master/visualization/readme.md)
+For windows,in the Anaconda Navigator terminal that appears :
 `streamlit run dashboard.py`
 
 ## Project Organization
