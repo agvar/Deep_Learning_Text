@@ -131,7 +131,28 @@ Run the following Docker container run command , using 8501 as the port
 
 Add port 8501 in the security group for inbound traffic from local machine
 
-To install the twitter consumer and producer
+## To install the twitter consumer and producer
+
+`pip install -r requirements.txt`
+
+Modify the ./twitter_streaming/twitter_streaming.ini file as needed to update the following:
+stream_filter ->set the filter on tweets to be processed
+stream_language -> sets the tweet language to look for
+file_max_tweet_limit -> maximum of tweets to be processed into a single json file
+collect_max_tweet_limt -> maximum of tweets to be processed on a single run.
+
+**To execute Producer process**  
+`python ./twitter_streaming/twitter_streaming/producer/twitter_stream_message_producer.py`
+
+**To execute Consumer process**
+`python ./twitter_streaming/twitter_streaming/consumer/twitter_stream_message_consumer.py`
+The consumer process reads tweets from Kinesis and calls the tensorFlow api to make predictions and stores them on s3.
+
+#### To run the dashboard using Streamlit
+
+For installation steps for Streamlit -> ![ Streamlit installation ](https://github.com/agvar/Deep_Learning_Text/blob/master/visualization/readme.md)
+In the Anaconda Navigator terminal that appears :
+`streamlit run dashboard.py`
 
 ## Project Organization
 
@@ -144,7 +165,7 @@ To install the twitter consumer and producer
 
 ## Credits
 
-https://ileriayo.github.io/markdown-badges/
+https://ileriayo.github.io/markdown-badges/  
 https://docs.docker.com/engine/install/
 
 ## License

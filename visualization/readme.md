@@ -11,6 +11,7 @@ Next you'll need to set up your environment.
 Follow the steps provided by Anaconda to set up and manage your environment using the Anaconda Navigator.
 
 Select the "▶" icon next to your new environment. Then select "Open terminal":
+![ Streamlit installation ](https://github.com/agvar/Deep_Learning_Text/blob/master/images/streamlist_installation.png)
 
 In the terminal that appears, type:
 
@@ -25,7 +26,3 @@ Streamlit's Hello app should appear in a new tab in your web browser!
 
 Use your new environment
 In Anaconda Navigator, open a terminal in your environment (see step 2 above).
-
-In the terminal that appears, use Streamlit as usual:
-
-`streamlit run myfile.py`
