@@ -23,6 +23,3 @@ Test that the installation worked:
 
 Streamlit's Hello app should appear in a new tab in your web browser!
 [streamlit_screen]()
-
-Use your new environment
-In Anaconda Navigator, open a terminal in your environment (see step 2 above).

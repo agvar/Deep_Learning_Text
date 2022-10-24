@@ -1,6 +1,6 @@
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?style=for-the-badge&logo=jupyter&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![Keras](https://img.shields.io/badge/Keras-%23D00000.svg?style=for-the-badge&logo=Keras&logoColor=white)
 
-# Twitter Sentiment Prediction
+# Twitter Sentiment Prediction (Deep Learning)
 
 ## Description
 
@@ -135,11 +135,11 @@ Add port 8501 in the security group for inbound traffic from local machine
 
 `pip install -r requirements.txt`
 
-Modify the ./twitter_streaming/twitter_streaming.ini file as needed to update the following:
-stream_filter ->set the filter on tweets to be processed
-stream_language -> sets the tweet language to look for
-file_max_tweet_limit -> maximum of tweets to be processed into a single json file
-collect_max_tweet_limt -> maximum of tweets to be processed on a single run.
+Modify the ./twitter_streaming/twitter_streaming.ini file as needed to update the following:  
+`stream_filter` ->set the filter on tweets to be processed  
+`stream_language` -> sets the tweet language to look for  
+`file_max_tweet_limit` -> maximum of tweets to be processed into a single json file  
+`collect_max_tweet_limt` -> maximum of tweets to be processed on a single run.
 
 **To execute Producer process**  
 `python ./twitter_streaming/twitter_streaming/producer/twitter_stream_message_producer.py`
@@ -150,7 +150,7 @@ The consumer process reads tweets from Kinesis and calls the tensorFlow api to m
 
 #### To run the dashboard using Streamlit
 
-For installation steps for Streamlit -> ![ Streamlit installation ](https://github.com/agvar/Deep_Learning_Text/blob/master/visualization/readme.md)
+For installation steps for Streamlit -> [ Streamlit installation ](https://github.com/agvar/Deep_Learning_Text/blob/master/visualization/readme.md)
 In the Anaconda Navigator terminal that appears :
 `streamlit run dashboard.py`
 
