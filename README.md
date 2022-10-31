@@ -4,11 +4,9 @@
 
 ## Description
 
-The project was created as part of the Springboard Machine Learning Bootcamp capstone project.  
-It predicts the sentiment ( positive, negetive,neutral ) on real-time tweets ,read using the tweepy API with a python Producer process.The tweets are pushed into a Kinesis data stream from where a python Consumer process reads them and invokes the Tensorflow Serving API to predict the sentiment.  
-The TensorFlow Serving application uses a BERT model and a classifier layer on top to make predictions. The response predications are displayed on a Streamlit dashboard to depict trends.  
-The twitter topic to be used when pulling tweets can be configured ,along with the number of tweets to be pulled, at a time.
-The raw tweets and the predictions are stored on AWS S3 as json files
+The project is used to predict the sentiment ( positive, negative, neutral ) on real-time tweets, read using the tweepy API with a python Producer process. The tweets are pushed into a Kinesis data stream from where a python Consumer process reads them and invokes the Tensorflow Serving API to predict the sentiment.
+The TensorFlow Serving application uses a BERT model and a classifier layer on top to make predictions. The response predictions are displayed on a Streamlit dashboard to depict trends.
+The Twitter topic to be used when pulling tweets can be configured, along with the number of tweets to be pulled, at a time. The raw tweets and the predictions are stored on AWS S3 as JSON files.
 
 ## Table of Contents
 
